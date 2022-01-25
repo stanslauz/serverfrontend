@@ -1,11 +1,11 @@
-<!-- <div>{{ appState$ | async | json }}</div> -->
+
 <div class="container-xl">
   <div class="table-responsive">
       <div class="table-wrapper">
           <div class="table-title">
               <div class="row">
                   <div class="col-sm-6">
-                      <h2>Manage Servers</h2>
+                      <h2>Servers inc</h2>
                   </div>
                   <div class="col-sm-6">
                       <button (click)="printReport()" type="button" class="btn btn-primary">Print Report</button>
@@ -15,6 +15,16 @@
                           <span>New Server</span>
                       </a>
 
+
+                      <a href="#addUser" class="btn btn-success" data-toggle="modal">
+                        <i class="material-icons">&#xE147;</i>
+                        <span>New user</span>
+                    </a>
+                    <a href="#logIn" class="btn btn-warning" data-toggle="modal">
+                        <!-- <i class="material-icons">&#xE147;</i> -->
+                        <span>Log in</span>
+                    </a>
+
                       <span>
                           <select (ngModelChange)="filterServers($event)" name="status" ngModel="ALL"  
                               class="btn btn-info" style="height: 32.91px;">
@@ -23,7 +33,12 @@
                               <option value="SERVER_DOWN">SERVER DOWN</option>
                           </select>
                       </span>
+
+
                   </div>
+
+
+                  
               </div>
           </div> <br>
           <ng-container *ngIf="(appState$ | async) as appState" [ngSwitch]="appState.dataState">
@@ -38,6 +53,7 @@
                           <tr>
                               <th>Image</th>
                               <th>IP Address</th>
+                              <th>Port</th>
                               <th>Name</th>
                               <th>Memory</th>
                               <th>Type</th>
@@ -50,6 +66,7 @@
                           <tr>
                               <td> <img [src]="server.imageUrl" [alt]="server.name" width="40" height="40"></td>
                               <td>{{ server.ipAddress }}</td>
+                              <td>{{ server.port ? server.port : 'N/A' }}</td>
                               <td>{{ server.name }}</td>
                               <td>{{ server.memory }}</td>
                               <td>{{ server.type }}</td>
@@ -60,7 +77,8 @@
                                   </span>
                               </td>
                               <td>
-                                  <a (click)="pingServer(server.ipAddress)" style="cursor: pointer;">
+                                  <a (click)="[server.port ? pingPort(server.ipAddress,server.port)  :  pingServer(server.ipAddress)]" style="cursor: pointer;">
+                                    
                                       <i *ngIf="(filterStatus$ | async) === '' || (filterStatus$ | async) !== server.ipAddress"
                                           class="material-icons" title="Ping server">&#xe328;</i>
                                       <i *ngIf="(filterStatus$ | async) === server.ipAddress"
@@ -99,6 +117,10 @@
                       <label>IP</label>
                       <input type="text" ngModel name="ipAddress" class="form-control" required>
                   </div>
+                  <div class="form-group">
+                    <label>Port</label>
+                    <input type="text" ngModel name="port" class="form-control" min="1" max = "65536">
+                </div>
                   <div class="form-group">
                       <label>Name</label>
                       <input type="text" ngModel name="name" class="form-control" required>
@@ -140,4 +162,83 @@
       </div>
   </div>
 </div>
+
+<!-- add user -->
+
+<div id="addUser" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form #userForm="ngForm" (ngSubmit)="saveUser(userForm)">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add User</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                 
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" ngModel name="name" class="form-control" required>
+                    </div>
+                  
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" ngModel name="password" class="form-control" required>
+                    </div>
+                  
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="closeModal1" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" [disabled]="userForm.invalid || (isLoading$ | async)"
+                        class="btn btn-success">
+                        <i *ngIf="isLoading$ | async" class="fas fa-spinner fa-spin"></i>
+                        <span *ngIf="isLoading$ | async">Saving...</span>
+                        <span *ngIf="!(isLoading$ | async)">Add</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+  </div>
+
+<!-- login -->
+
+
+  <div id="logIn" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form #serverForm="ngForm" (ngSubmit)="saveServer(serverForm)">
+                <div class="modal-header">
+                    <h4 class="modal-title">Log in</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                 
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" ngModel name="name" class="form-control" required>
+                    </div>
+                  
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" ngModel name="name" class="form-control" required>
+                    </div>
+                  
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="closeModal2" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" [disabled]="serverForm.invalid || (isLoading$ | async)"
+                        class="btn btn-success">
+                        <i *ngIf="isLoading$ | async" class="fas fa-spinner fa-spin"></i>
+                        <span *ngIf="isLoading$ | async">Saving...</span>
+                        <span *ngIf="!(isLoading$ | async)">Add</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+  </div>
 <notifier-container></notifier-container>

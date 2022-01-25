@@ -1,26 +1,52 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Status } from '../enum/status.enum';
 import { CustomResponse } from '../interface/custom-response';
 import { Server } from '../interface/server';
+import { Users } from '../interface/users';
 
 @Injectable({ providedIn: 'root' })
 export class ServerService {
-  private readonly apiUrl = 'http://localhost:8080';
+  private readonly apiUrl = 'http://localhost:8089';
 
-  constructor(private http: HttpClient) { }
-
+  constructor(private http: HttpClient ) { }
+  //todo server should ping first onload
   servers$ = <Observable<CustomResponse>>
+
     this.http.get<CustomResponse>(`${this.apiUrl}/server/list`)
       .pipe(
         tap(console.log),
         catchError(this.handleError)
       );
 
+  users$ = <Observable<CustomResponse>>
+
+    this.http.get<CustomResponse>(`${this.apiUrl}/server/listUsers`)
+      .pipe(
+        tap(console.log),
+        catchError(this.handleError)
+      );
   save$ = (server: Server) => <Observable<CustomResponse>>
     this.http.post<CustomResponse>(`${this.apiUrl}/server/save`, server)
+      .pipe(
+        tap(console.log),
+        catchError(this.handleError)
+      );
+
+
+  // saveUser(user: Users):Observable<CustomResponse>{
+  //   console.log("saving user ....");
+  //   return this.http.post<CustomResponse>(`${this.apiUrl}/server/userSave`,user)
+  //   .pipe(
+  //     tap(console.log),
+  //     catchError(this.handleError)
+  //   );
+  // }
+
+  saveUser$ = (users: Users) => <Observable<CustomResponse>>
+    this.http.post<CustomResponse>(`${this.apiUrl}/server/userSave`, users)
       .pipe(
         tap(console.log),
         catchError(this.handleError)
@@ -33,6 +59,13 @@ export class ServerService {
         catchError(this.handleError)
       );
 
+
+  pingPort$ = (ipAddress: string, port: any) => <Observable<CustomResponse>>
+    this.http.get<CustomResponse>(`${this.apiUrl}/server/ping/${ipAddress}/${port}`)
+      .pipe(
+        tap(console.log),
+        catchError(this.handleError)
+      );
   filter$ = (status: Status, response: CustomResponse) => <Observable<CustomResponse>>
     new Observable<CustomResponse>(
       suscriber => {
