@@ -15,14 +15,19 @@
                           <span>New Server</span>
                       </a>
 
+                        <!-- component user -->
+                      <app-signup ></app-signup>
 
-                      <a href="#addUser" class="btn btn-success" data-toggle="modal">
-                        <i class="material-icons">&#xE147;</i>
-                        <span>New user</span>
-                    </a>
-                    <a href="#logIn" class="btn btn-warning" data-toggle="modal">
+                    <a href="#logIn" class="btn btn-primary" *ngIf="signedInStatus == 'false' || signedInStatus == null" data-toggle="modal">
                         <!-- <i class="material-icons">&#xE147;</i> -->
-                        <span>Log in</span>
+                        <span *ngIf="signedInStatus == 'false'  || signedInStatus == null">Log in</span>
+                        
+                    </a>
+
+                    <a (click)="logOut()" class="btn btn-warning" *ngIf="signedInStatus == 'true'" >
+                        <!-- <i class="material-icons">&#xE147;</i> -->
+                    
+                        <span *ngIf="signedInStatus">Log out</span>
                     </a>
 
                       <span>
@@ -163,52 +168,12 @@
   </div>
 </div>
 
-<!-- add user -->
-
-<div id="addUser" class="modal fade">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form #userForm="ngForm" (ngSubmit)="saveUser(userForm)">
-                <div class="modal-header">
-                    <h4 class="modal-title">Add User</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                </div>
-                <div class="modal-body">
-                 
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input type="text" ngModel name="name" class="form-control" required>
-                    </div>
-                  
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" ngModel name="password" class="form-control" required>
-                    </div>
-                  
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" id="closeModal1" data-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button type="submit" [disabled]="userForm.invalid || (isLoading$ | async)"
-                        class="btn btn-success">
-                        <i *ngIf="isLoading$ | async" class="fas fa-spinner fa-spin"></i>
-                        <span *ngIf="isLoading$ | async">Saving...</span>
-                        <span *ngIf="!(isLoading$ | async)">Add</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-  </div>
-
-<!-- login -->
 
 
   <div id="logIn" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form #serverForm="ngForm" (ngSubmit)="saveServer(serverForm)">
+            <form #signForm="ngForm" (ngSubmit)="signIn(signForm)">
                 <div class="modal-header">
                     <h4 class="modal-title">Log in</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -219,10 +184,10 @@
                         <label>Name</label>
                         <input type="text" ngModel name="name" class="form-control" required>
                     </div>
-                  
+                    
                     <div class="form-group">
                         <label>Password</label>
-                        <input type="password" ngModel name="name" class="form-control" required>
+                        <input type="password" ngModel name="password" class="form-control" required>
                     </div>
                   
                 </div>
@@ -230,11 +195,12 @@
                     <button type="button" class="btn btn-warning" id="closeModal2" data-dismiss="modal">
                         Cancel
                     </button>
-                    <button type="submit" [disabled]="serverForm.invalid || (isLoading$ | async)"
+                    <button type="submit" [disabled]="signForm.invalid || (isLoading$ | async)"
                         class="btn btn-success">
-                        <i *ngIf="isLoading$ | async" class="fas fa-spinner fa-spin"></i>
+                        <!-- <i *ngIf="isLoading$ | async" class="fas fa-spinner fa-spin"></i>
                         <span *ngIf="isLoading$ | async">Saving...</span>
-                        <span *ngIf="!(isLoading$ | async)">Add</span>
+                        <span *ngIf="!(isLoading$ | async)">Add</span> -->
+                        submit
                     </button>
                 </div>
             </form>

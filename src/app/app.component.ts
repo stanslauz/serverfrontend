@@ -33,31 +33,22 @@ export class AppComponent implements OnInit {
   private isLoadingUser = new BehaviorSubject<boolean>(false);
   isLoading$ = this.isLoading.asObservable();
 
+  signedInStatus: any;
 
+  signedInYet: boolean = false;
   constructor(private serverService: ServerService, private notifier: NotificationService) { }
 
   ngOnInit(): void {
-  
-    // this.appState$ = this.serverService.servers$
-    //   .pipe(
-    //     map(response => {
-    //       this.notifier.onDefault(response.message);
-    //       this.dataSubject.next(response);
-    //       return { dataState: DataState.LOADED_STATE, appData: { ...response, data: { servers: response.data.servers.reverse() } } }
-    //     }),
-    //     startWith({ dataState: DataState.LOADING_STATE }),
-    //     catchError((error: string) => {
-    //       this.notifier.onError(error);
-    //       return of({ dataState: DataState.ERROR_STATE, error });
-    //     })
-    //   );
+    
+    this.signedInStatus = localStorage.getItem('signedin');
+    if(localStorage.getItem('signedin') == "false" || localStorage.getItem('signedin') == null){
       
-      this.appState$ =  this.serverService.users$
+      this.appState$ = this.serverService.servers$
       .pipe(
         map(response => {
           this.notifier.onDefault(response.message);
-          this.userSubject.next(response);
-          return { dataState: DataState.LOADED_STATE, appData: { ...response, data: { users: response.data.users.reverse() } } }
+          this.dataSubject.next(response);
+          return { dataState: DataState.LOADED_STATE, appData: { ...response, data: { servers: response.data.servers.reverse() } } }
         }),
         startWith({ dataState: DataState.LOADING_STATE }),
         catchError((error: string) => {
@@ -65,22 +56,24 @@ export class AppComponent implements OnInit {
           return of({ dataState: DataState.ERROR_STATE, error });
         })
       );
-        
 
-    
-      //  this.userState$ = this.serverService.users$
-      // .pipe(
-      //   map(response => {
-      //     this.notifier.onDefault(response.message);
-      //     this.userSubject.next(response);
-      //     return { dataState: DataState.LOADED_STATE, appData: { ...response, data: { users: response.data.users.reverse() } } }
-      //   }),
-      //   startWith({ dataState: DataState.LOADING_STATE }),
-      //   catchError((error: string) => {
-      //     this.notifier.onError(error);
-      //     return of({ dataState: DataState.ERROR_STATE, error });
-      //   })
-      // );
+    }else{
+      this.appState$ = this.serverService.serversWithUser$(localStorage.getItem('id'))
+      .pipe(
+        map(response => {
+          this.notifier.onDefault(response.message);
+          this.dataSubject.next(response);
+          return { dataState: DataState.LOADED_STATE, appData: { ...response, data: { servers: response.data.servers.reverse() } } }
+        }),
+        startWith({ dataState: DataState.LOADING_STATE }),
+        catchError((error: string) => {
+          this.notifier.onError(error);
+          return of({ dataState: DataState.ERROR_STATE, error });
+        })
+      );
+    }
+ 
+  
      
   }
 
@@ -139,7 +132,9 @@ export class AppComponent implements OnInit {
     }else{
 
       this.isLoading.next(true);
-      this.appState$ = this.serverService.save$(serverForm.value as Server)
+
+      if(localStorage.getItem('signedin') == "false" || localStorage.getItem('signedin') == null){
+        this.appState$ = this.serverService.save$(serverForm.value as Server)
         .pipe(
           map(response => {
             this.dataSubject.next(
@@ -158,76 +153,55 @@ export class AppComponent implements OnInit {
             return of({ dataState: DataState.ERROR_STATE, error });
           })
         );
+      }else{
+        this.serverService.saveServerWithUser$(serverForm.value as Server, localStorage.getItem('id') )
+       .subscribe(response => {
+        this.notifier.onDefault(response.message);
+        
+        document.getElementById('closeModal').click();
+        window.location.reload();
+        
+       })
+        
+      }
+    
     }
 
 }
 
-saveUser(userForm: NgForm): void {
- 
- 
 
-    this.isLoading.next(true);
-    this.appState$ = this.serverService.saveUser$(userForm.value as Users)
-      .pipe(
-        map(response => {
-          this.userSubject.next(
-            {...response, data: { users: [response.data?.user, ...this.userSubject.value.data.users] } }
-            
-          );
-          console.log("we re here");
-          this.notifier.onDefault(response.message);
-          document.getElementById('closeModal1').click();
-          this.isLoading.next(false);
-          // serverForm.resetForm({ status: this.Status.SERVER_DOWN });
-          return { dataState: DataState.LOADED_STATE, appData: this.dataSubject.value }
-        }),
-        startWith({ dataState: DataState.LOADED_STATE, appData: this.dataSubject.value }),
-        catchError((error: string) => {
-          this.isLoading.next(false);
-          this.notifier.onError(error);
-          return of({ dataState: DataState.ERROR_STATE, error });
-        })
-      );
+
+signIn(signForm: NgForm): void {
+
+  console.log(signForm.value);
+  
+  this.serverService.loginUser$(signForm.value).subscribe(
+    response=> {
+
+      
+      this.notifier.onDefault(response.message);
+      if(response.statusCode == 202){
+        document.getElementById('closeModal2').click();
+        this.signedInYet = true;
+        localStorage.setItem("signedin", JSON.stringify(this.signedInYet));
+        localStorage.setItem("id", JSON.stringify(response.data.user.id));
+        // response.data.user.
+        window.location.reload();
+      
+      }
+      
+    }
+    
+  ), error => {
+    console.log(error);
+
+  }
+
   
 
 }
-
-
-
-
-// saveUser(userForm: NgForm): void {
  
 
-//     this.isLoadingUser.next(true);
-//     console.log(userForm.value);
-//     console.log("this is the functions");
-//     this.serverService.saveUser$(userForm.value as Users)
-//           .pipe(
-            
-//             map(response => {
-//               this.userSubject.next(
-                 
-//                 {...response, data: { users: [response.data.user, ...this.userSubject.value.data.users] } }
-//               );
-
-//               console.log(userForm.value);
-//               this.notifier.onDefault(response.message);
-//               document.getElementById('closeModal1').click();
-//               this.isLoading.next(false);
-//               // userForm.resetForm({ name });
-//               return { dataState: DataState.LOADED_STATE, appData: this.dataSubject.value }
-//             }),
-//             startWith({ dataState: DataState.LOADED_STATE, appData: this.dataSubject.value }),
-//             catchError((error: string) => {
-//               this.isLoadingUser.next(false);
-//               this.notifier.onError(error);
-//               return of({ dataState: DataState.ERROR_STATE, error });
-//             })
-//           );
-       
-//   // this.serverService.save(userForm.value as Users);
-//   // console.log(userForm.value);
-// }
 
   filterServers(status: Status): void {
     this.appState$ = this.serverService.filter$(status, this.dataSubject.value)
@@ -276,4 +250,19 @@ saveUser(userForm: NgForm): void {
     downloadLink.click();
     document.body.removeChild(downloadLink);
   }
+
+
+  logOut(): void{
+    localStorage.setItem("signedin", "false" );
+    localStorage.setItem("id", null);
+    // response.data.user.
+    window.location.reload();
+  }
+  
+  
+  
 }
+
+
+
+

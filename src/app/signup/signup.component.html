@@ -1,0 +1,52 @@
+
+
+
+
+
+
+
+<a href="#addUser" class="btn btn-success" *ngIf="signedInStatus == 'false'  || signedInStatus == null" data-toggle="modal">
+    <i class="material-icons">&#xE147;</i>
+    <span>New user</span>
+</a>
+
+
+
+
+
+<div id="addUser" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form #userForm="ngForm" (ngSubmit)="saveUser(userForm)" >
+                <div class="modal-header">
+                    <h4 class="modal-title">Add User</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" ngModel name="name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" ngModel name="password" class="form-control" required>
+                    </div>
+                  
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="closeModal" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" [disabled]="userForm.invalid || (isLoading$ | async)"
+                    class="btn btn-success">
+                    <i *ngIf="isLoading$ | async" class="fas fa-spinner fa-spin"></i>
+                    <span *ngIf="isLoading$ | async">Saving...</span>
+                    <span *ngIf="!(isLoading$ | async)">Add</span>
+                </button>
+                </div>
+            </form>
+        </div>
+    </div>
+  </div> 

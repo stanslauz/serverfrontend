@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+  import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
@@ -21,6 +21,14 @@ export class ServerService {
         catchError(this.handleError)
       );
 
+      serversWithUser$ = (id : any) => <Observable<CustomResponse>>
+
+      this.http.get<CustomResponse>(`${this.apiUrl}/server/list/${id}`)
+        .pipe(
+          tap(console.log),
+          catchError(this.handleError)
+        );
+
   users$ = <Observable<CustomResponse>>
 
     this.http.get<CustomResponse>(`${this.apiUrl}/server/listUsers`)
@@ -35,22 +43,31 @@ export class ServerService {
         catchError(this.handleError)
       );
 
-
-  // saveUser(user: Users):Observable<CustomResponse>{
-  //   console.log("saving user ....");
-  //   return this.http.post<CustomResponse>(`${this.apiUrl}/server/userSave`,user)
-  //   .pipe(
-  //     tap(console.log),
-  //     catchError(this.handleError)
-  //   );
-  // }
-
-  saveUser$ = (users: Users) => <Observable<CustomResponse>>
-    this.http.post<CustomResponse>(`${this.apiUrl}/server/userSave`, users)
+      saveServerWithUser$ =   (server: Server, id : any) => <Observable<CustomResponse>>
+    this.http.post<CustomResponse>(`${this.apiUrl}/server/save/${id}`, server)
       .pipe(
         tap(console.log),
         catchError(this.handleError)
       );
+
+
+
+
+
+      saveUser$ = (users: Users) => <Observable<CustomResponse>>
+      this.http.post<CustomResponse>(`${this.apiUrl}/user`, users)
+        .pipe(
+          tap(console.log),
+          catchError(this.handleError)
+        );
+
+
+        loginUser$ = (users: Users) => <Observable<CustomResponse>>
+        this.http.post<CustomResponse>(`${this.apiUrl}/user/sign-in`, users)
+          .pipe(
+            tap(console.log),
+            catchError(this.handleError)
+          );
 
   ping$ = (ipAddress: string) => <Observable<CustomResponse>>
     this.http.get<CustomResponse>(`${this.apiUrl}/server/ping/${ipAddress}`)
